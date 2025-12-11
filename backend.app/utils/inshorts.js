@@ -84,3 +84,4 @@ export async function getNews(category) {
     data: parsed
   };
 }
+    
