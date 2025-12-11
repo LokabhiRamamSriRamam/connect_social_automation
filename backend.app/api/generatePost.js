@@ -32,10 +32,10 @@ if (req.method === "OPTIONS") {
   
   const { news, socials } = req.body;
 
-  if (!news || !Array.isArray(socials) || socials.length === 0) {
-    res.status(400).json({ success: false, error: "Missing news or socials array" });
-    return;
-  }
+ // After
+if (!news || typeof news !== "object" || !Array.isArray(socials) || socials.length === 0) {
+  return res.status(400).json({ success: false, error: "Missing news object or socials array" });
+}
 
   try {
     // Construct Gemini prompt
