@@ -1,5 +1,5 @@
 // src/pages/api/generatePost.js
-import fetch from "node-fetch";
+// --- REMOVE THIS LINE: import fetch from "node-fetch";
 
 // Replace with your Gemini API key
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -7,9 +7,8 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type"); // ✅ Handle preflight OPTIONS request
 
-  // ✅ Handle preflight OPTIONS request
   if (req.method === "OPTIONS") {
     res.status(204).end(); // 204 No Content is best for preflight
     return;
@@ -73,10 +72,9 @@ URL: ${news.readMoreUrl || news.url || ""}
 Platforms: LinkedIn, X
 
 Return a JSON object with keys as platforms and values as the post text.
-`;
+`; // --- UPDATED CODE FOR GEMINI API INTERACTION ---
 
-    // --- UPDATED CODE FOR GEMINI API INTERACTION ---
-    const GEMINI_MODEL = "gemini-2.5-flash";
+    const GEMINI_MODEL = "gemini-2.5-flash"; // NOTE: Using the global 'fetch' function now
 
     const geminiResponse = await fetch(
       // 1. CORRECT ENDPOINT: Using the official Google AI endpoint with the API key in the query string
@@ -84,7 +82,7 @@ Return a JSON object with keys as platforms and values as the post text.
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json", // 2. REMOVED AUTHORIZATION HEADER: API key is now in the URL
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           // 3. CORRECT PAYLOAD STRUCTURE
@@ -94,17 +92,13 @@ Return a JSON object with keys as platforms and values as the post text.
           },
         }),
       }
-    );
+    ); // Check for non-200 status from the Gemini API itself
 
-    // Check for non-200 status from the Gemini API itself
     if (!geminiResponse.ok) {
-      const errorData = await geminiResponse
-        .json()
-        .catch(() => ({
-          error: { message: "Failed to parse API error response." },
-        }));
-      console.error("External API Error:", errorData);
-      // Throw a descriptive error to be caught by the outer catch block
+      const errorData = await geminiResponse.json().catch(() => ({
+        error: { message: "Failed to parse API error response." },
+      }));
+      console.error("External API Error:", errorData); // Throw a descriptive error to be caught by the outer catch block
       throw new Error(
         `Gemini API call failed with status ${geminiResponse.status}: ${
           errorData?.error?.message || "Unknown error"
@@ -114,7 +108,7 @@ Return a JSON object with keys as platforms and values as the post text.
 
     const data = await geminiResponse.json(); // 4. CORRECT RESPONSE PARSING: Extracting text from the official Gemini REST API format
 
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || ""; // Parse JSON from Gemini if it returns JSON text
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     let posts = {};
     try {
@@ -134,14 +128,11 @@ Return a JSON object with keys as platforms and values as the post text.
 
     res.status(200).json({ success: true, posts });
   } catch (err) {
-    console.error("API Processing error:", err);
-    // Send a 500 status with the error message from the try block
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: "Internal Server Error during AI processing",
-        message: err.message,
-      });
+    console.error("API Processing error:", err); // Send a 500 status with the error message from the try block
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error during AI processing",
+      message: err.message,
+    });
   }
 }
