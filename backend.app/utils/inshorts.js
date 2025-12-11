@@ -12,7 +12,7 @@ export async function getNews(category) {
 
   const params = new URLSearchParams({
     category: "top_stories",
-    max_limit: "50",
+    max_limit: "60",
     include_card_data: "true"
   });
 
@@ -20,7 +20,7 @@ export async function getNews(category) {
 
   if (category === "all") {
     url =
-      "https://inshorts.com/api/en/news?category=all_news&max_limit=10&include_card_data=true";
+      "https://inshorts.com/api/en/news?category=all_news&max_limit=50&include_card_data=true";
   } else {
     url = `https://inshorts.com/api/en/search/trending_topics/${category}?${params.toString()}`;
   }
